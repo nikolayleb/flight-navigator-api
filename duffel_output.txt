@@ -1,0 +1,10 @@
+Starting duffel near-future date test...
+Target date: 2026-08-10
+
+--- Testing route: LHR -> JFK on 2026-08-10 ---
+Success! Found 0 offers.
+
+--- Testing route: HEL -> MUC on 2026-08-10 ---
+Success! Found 0 offers.
+
+Finished.
