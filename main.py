@@ -280,7 +280,11 @@ def fetch_google_sync(origin_iata: str, destination_iata: str, departure_date: s
 
 @app.get("/")
 def read_root():
-    return {"message": "Welcome to Flight Navigator API. Use GET /api/search to find flights."}
+    return {
+        "status": "working",
+        "message": "Welcome to Flight Navigator API. Use GET /api/search to find flights.",
+        "docs": "/docs"
+    }
 
 @app.get("/api/search")
 async def search(
