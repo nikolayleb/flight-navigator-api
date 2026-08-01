@@ -280,7 +280,7 @@ def fetch_google_sync(origin_iata: str, destination_iata: str, departure_date: s
         return []
 
 @app.get("/", response_class=FileResponse)
-def read_root():
+async def read_root():
     return FileResponse("index.html")
 
 @app.get("/api/search")
