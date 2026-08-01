@@ -326,3 +326,12 @@ async def search(
         "date_type": date_type,
         "results": selected_flights
     }
+
+if __name__ == "__main__":
+    import uvicorn
+    # Render sets the PORT environment variable
+    port = int(os.getenv("PORT", 8000))
+    # Enable reload only when running locally (PORT is not set in env)
+    should_reload = os.getenv("PORT") is None
+    uvicorn.run("main:app", host="0.0.0.0", port=port, reload=should_reload)
+
