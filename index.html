@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -23,7 +23,23 @@
 
     .container {
       max-width: 700px;
-      margin: 40px auto;
+      margin: 20px auto;
+    }
+
+    .top-bar {
+      display: flex;
+      justify-content: flex-end;
+      margin-bottom: 15px;
+    }
+
+    .lang-select {
+      padding: 6px 12px;
+      border-radius: 6px;
+      border: 1px solid #D1D5DB;
+      background: white;
+      font-weight: 600;
+      cursor: pointer;
+      outline: none;
     }
 
     header {
@@ -37,7 +53,11 @@
       color: var(--primary);
     }
 
-    /* Форма поиска */
+    header p {
+      color: #6B7280;
+      margin-top: 6px;
+    }
+
     .search-card {
       background: var(--card-bg);
       padding: 24px;
@@ -93,14 +113,12 @@
       background-color: var(--primary-hover);
     }
 
-    /* Статус и Лоадер */
     #status {
       text-align: center;
       margin: 20px 0;
       font-weight: 500;
     }
 
-    /* Карточки билетов */
     .results {
       display: flex;
       flex-direction: column;
@@ -135,6 +153,9 @@
 
     .price-box {
       text-align: right;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
     }
 
     .price {
@@ -166,84 +187,173 @@
 <body>
 
   <div class="container">
+    <div class="top-bar">
+      <select id="langSelect" class="lang-select" onchange="changeLanguage()">
+        <option value="en" selected>English</option>
+        <option value="ru">Русский</option>
+      </select>
+    </div>
+
     <header>
-      <h1>Flight Navigator ✈️</h1>
-      <p>Поиск лучших билетов по всему миру</p>
+      <h1 id="titleText">Flight Navigator ✈️</h1>
+      <p id="subtitleText">Search the best flight deals around the world</p>
     </header>
 
-    <!-- Форма ввода -->
+    <!-- Search Card -->
     <div class="search-card">
       <div class="form-group">
-        <label for="origin">Откуда (IATA)</label>
-        <input type="text" id="origin" value="HEL" placeholder="HEL">
+        <label id="lblOrigin" for="origin">From (IATA / City)</label>
+        <input type="text" id="origin" value="HEL" placeholder="e.g. Helsinki">
       </div>
 
       <div class="form-group">
-        <label for="destination">Куда (IATA)</label>
-        <input type="text" id="destination" value="MUC" placeholder="MUC">
+        <label id="lblDestination" for="destination">To (IATA / City)</label>
+        <input type="text" id="destination" value="BCN" placeholder="e.g. Barcelona">
       </div>
 
       <div class="form-group full-width">
-        <label for="date">Дата вылета</label>
-        <input type="date" id="date" value="2026-09-01">
+        <label id="lblDate" for="date">Departure Date / Preference</label>
+        <input type="text" id="date" value="2026-09-01" placeholder="e.g. 2026-09-01 or September">
       </div>
 
       <div class="form-group full-width">
-        <button onclick="searchFlights()">Найти билеты</button>
+        <button id="btnSearch" onclick="searchFlights()">Search Flights</button>
       </div>
     </div>
 
-    <!-- Индикатор загрузки / Ошибки -->
+    <!-- Load Status -->
     <div id="status"></div>
 
-    <!-- Результаты -->
+    <!-- Results -->
     <div id="results" class="results"></div>
   </div>
 
   <script>
+    const TRANSLATIONS = {
+      en: {
+        title: "Flight Navigator ✈️",
+        subtitle: "Search the best flight deals around the world",
+        labelOrigin: "From (IATA / City)",
+        labelDestination: "To (IATA / City)",
+        labelDate: "Departure Date / Preference",
+        placeholderOrigin: "e.g. Helsinki",
+        placeholderDestination: "e.g. Barcelona",
+        placeholderDate: "e.g. 2026-09-01 or September",
+        buttonSearch: "Search Flights",
+        statusSearching: "⏳ Searching for the best offers...",
+        statusNoResults: "❌ No flights found for your query.",
+        statusError: "⚠️ Failed to fetch flights. Make sure the server is running.",
+        labelDatePrefix: "Date",
+        labelStopsPrefix: "Stops",
+        labelSourcePrefix: "Source",
+        buyBtn: "Buy Ticket",
+        directFlight: "Direct"
+      },
+      ru: {
+        title: "МультиАвиаНавигатор ✈️",
+        subtitle: "Поиск лучших авиабилетов по всему миру",
+        labelOrigin: "Откуда (IATA / Город)",
+        labelDestination: "Куда (IATA / Город)",
+        labelDate: "Дата вылета / Пожелания",
+        placeholderOrigin: "Например: Хельсинки",
+        placeholderDestination: "Например: Барселона",
+        placeholderDate: "Например: 2026-09-01 или на сентябрь",
+        buttonSearch: "Найти билеты",
+        statusSearching: "⏳ Ищем лучшие предложения...",
+        statusNoResults: "❌ Билетов по вашему запросу не найдено.",
+        statusError: "⚠️ Не удалось получить билеты. Убедись, что сервер работает.",
+        labelDatePrefix: "Дата",
+        labelStopsPrefix: "Пересадок",
+        labelSourcePrefix: "Источник",
+        buyBtn: "Купить билет",
+        directFlight: "Без пересадок"
+      }
+    };
+
+    let currentLang = "en";
+
+    function changeLanguage() {
+      currentLang = document.getElementById("langSelect").value;
+      const t = TRANSLATIONS[currentLang];
+
+      document.getElementById("titleText").innerText = t.title;
+      document.getElementById("subtitleText").innerText = t.subtitle;
+      document.getElementById("lblOrigin").innerText = t.labelOrigin;
+      document.getElementById("lblDestination").innerText = t.labelDestination;
+      document.getElementById("lblDate").innerText = t.labelDate;
+      document.getElementById("origin").placeholder = t.placeholderOrigin;
+      document.getElementById("destination").placeholder = t.placeholderDestination;
+      document.getElementById("date").placeholder = t.placeholderDate;
+      document.getElementById("btnSearch").innerText = t.buttonSearch;
+
+      const originInput = document.getElementById("origin");
+      const destInput = document.getElementById("destination");
+      const dateInput = document.getElementById("date");
+
+      if (currentLang === "ru") {
+        if (originInput.value === "HEL") originInput.value = "Хельсинки";
+        if (destInput.value === "BCN") destInput.value = "Барселона";
+        if (dateInput.value === "2026-09-01") dateInput.value = "на сентябрь";
+      } else {
+        if (originInput.value === "Хельсинки") originInput.value = "HEL";
+        if (destInput.value === "Барселона") destInput.value = "BCN";
+        if (dateInput.value === "на сентябрь") dateInput.value = "2026-09-01";
+      }
+    }
+
     async function searchFlights() {
-      const origin = document.getElementById('origin').value.toUpperCase();
-      const destination = document.getElementById('destination').value.toUpperCase();
-      const date = document.getElementById('date').value;
+      const origin = document.getElementById('origin').value.trim();
+      const destination = document.getElementById('destination').value.trim();
+      const dateVal = document.getElementById('date').value.trim();
 
       const statusDiv = document.getElementById('status');
       const resultsDiv = document.getElementById('results');
+      const t = TRANSLATIONS[currentLang];
 
-      // Очищаем прошлые результаты и показываем загрузку
+      if (!origin || !destination || !dateVal) {
+        statusDiv.innerHTML = currentLang === "ru" 
+          ? "⚠️ Заполните все поля перед поиском." 
+          : "⚠️ Please fill all fields before searching.";
+        return;
+      }
+
       resultsDiv.innerHTML = '';
-      statusDiv.innerHTML = '⏳ Ищем лучшая предложения...';
+      statusDiv.innerHTML = t.statusSearching;
 
-      // Адрес твоего задеплоенного API на Render
-      const apiUrl = `https://flight-navigator-api.onrender.com/api/search?origin=${origin}&destination=${destination}&date=${date}&mode=deep`;
+      const apiUrl = `/api/search?origin=${encodeURIComponent(origin)}&destination=${encodeURIComponent(destination)}&date=${encodeURIComponent(dateVal)}&mode=deep`;
 
       try {
         const response = await fetch(apiUrl);
-        
         if (!response.ok) {
-          throw new Error('Ошибка при получении данных от сервера');
+          throw new Error('Server error');
         }
 
         const data = await response.json();
         statusDiv.innerHTML = '';
 
         if (!data.results || data.results.length === 0) {
-          statusDiv.innerHTML = '❌ Билетов по вашему запросу не найдено.';
+          statusDiv.innerHTML = t.statusNoResults;
           return;
         }
 
-        // Отрисовываем билеты
         data.results.forEach(flight => {
           const card = document.createElement('div');
           card.className = 'ticket-card';
           
+          const changes = flight.number_of_changes ?? 0;
+          const changesText = changes === 0 ? t.directFlight : `${t.labelStopsPrefix}: ${changes}`;
+          const depDate = flight.departure_date || dateVal;
+          const timeText = flight.departure_time ? ` ${flight.departure_time}` : '';
+          
           card.innerHTML = `
             <div class="ticket-info">
-              <span class="airline">${flight.airline || 'Авиакомпания'}</span>
-              <span class="details">Дата: ${flight.departure_date || date} | Пересадок: ${flight.number_of_changes ?? 0}</span>
-              <div><span class="source-badge">Источник: ${flight.source}</span></div>
+              <span class="airline">${flight.airline || 'Airline'}</span>
+              <span class="details">${t.labelDatePrefix}: ${depDate}${timeText} | ${changesText}</span>
+              <div><span class="source-badge">${t.labelSourcePrefix}: ${flight.source}</span></div>
             </div>
             <div class="price-box">
               <div class="price">${flight.price} €</div>
+              ${flight.booking_url ? `<a href="${flight.booking_url}" target="_blank" style="text-decoration: none;"><button style="padding: 6px 12px; margin-top: 8px; font-size: 0.85rem; height: auto; width: auto; font-weight: 500;">${t.buyBtn}</button></a>` : ''}
             </div>
           `;
           resultsDiv.appendChild(card);
@@ -251,7 +361,7 @@
 
       } catch (error) {
         console.error(error);
-        statusDiv.innerHTML = '⚠️ Не удалось получить билеты. Убедись, что сервер работает.';
+        statusDiv.innerHTML = t.statusError;
       }
     }
   </script>
