@@ -6,6 +6,7 @@ from datetime import date, timedelta, datetime
 from typing import List, Optional
 from fastapi import FastAPI, Query, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
 from dotenv import load_dotenv
 
 # Load environment variables
@@ -278,13 +279,9 @@ def fetch_google_sync(origin_iata: str, destination_iata: str, departure_date: s
         print(f"Error fetching from Google Flights: {e}")
         return []
 
-@app.get("/")
+@app.get("/", response_class=FileResponse)
 def read_root():
-    return {
-        "status": "working",
-        "message": "Welcome to Flight Navigator API. Use GET /api/search to find flights.",
-        "docs": "/docs"
-    }
+    return FileResponse("index.html")
 
 @app.get("/api/search")
 async def search(
